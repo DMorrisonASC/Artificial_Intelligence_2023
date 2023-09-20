@@ -16,7 +16,12 @@ class Environment:
         #iterate through envy and populate randomly
         self.rows = 10
         self.cols = 10
-        self.envy = [[random.randint(0,1) for i in range(self.rows+2)] for i in range(self.cols+2)]
+        # Populate a randoms
+
+        # random.seed(10) # using seed?
+        # self.envy = [[random.randint(0,1) for i in range(self.rows+2)] for i in range(self.cols+2)]
+
+        self.envy = [[0,1,0,1,0,1,0,1,1,1,0,1] for i in range(self.cols+2)]
         
         for x in range(self.rows+2):
             self.envy[x][0] = -1
@@ -32,7 +37,6 @@ class Environment:
 
     def setStatus(self, posRow, posCol, status):
         self.envy[posRow][posCol] = status
-        print("New State is at Coors:",self.envy[posRow][posCol])
     
     def printEnvy(self):
         for eachRow in self.envy:
@@ -47,7 +51,7 @@ class Agent:
         self.currentPosY = int(self.initalPosY)
         self.currentPos = [self.currentPosX, self.currentPosY]
         print("Rooma started at points: ",self.initalPosX, self.initalPosY)
-        # playGround.printEnvy()
+        print("Inital Pos",self.currentPos)
 
     def scanEnvy(self):
             dirtyList = []
@@ -55,7 +59,6 @@ class Agent:
                 for y in range(self.playGround.cols+1):
                     if (self.playGround.getStatus(x,y) == 1):
                         dirtyList.append([x,y])
-            print("List: ",dirtyList)
             return dirtyList
                 
 
@@ -70,7 +73,6 @@ class Agent:
                     near = check
                     nearPoint = dList[item]
             return nearPoint
-
 
     def move(self, steps):
         clean = False
@@ -97,7 +99,7 @@ class Agent:
 
                     arrived = True
                 self.playGround.setStatus(destination[0], destination[1], 999)
-            print("remaining steps taken:",totalSteps)
+        print("remaining steps left: ",totalSteps)
 
     def goLeft(self):
         if currentPos[0] > 0:
