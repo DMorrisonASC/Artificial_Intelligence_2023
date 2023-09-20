@@ -51,10 +51,11 @@ class Agent:
 
     def scanEnvy(self):
             dirtyList = []
-            for x in range(self.playGround.rows):
-                for y in range(self.playGround.cols):
+            for x in range(self.playGround.rows+1):
+                for y in range(self.playGround.cols+1):
                     if (self.playGround.getStatus(x,y) == 1):
                         dirtyList.append([x,y])
+            print("List: ",dirtyList)
             return dirtyList
                 
 
@@ -72,30 +73,31 @@ class Agent:
 
 
     def move(self, steps):
-        arrived = False
+        clean = False
         totalSteps = steps
-        destination = self.findNearest()
+        while (totalSteps > 0 and clean == False):
+            arrived = False
+            destination = self.findNearest()
+            if (destination == [12,12]):
+                break
+            else:
+                while arrived == False and totalSteps > 0:
+                    while self.currentPosX > destination[0] and totalSteps > 0:
+                        totalSteps -= 1
+                        self.currentPosX -= 1
+                    while self.currentPosX < destination[0] and totalSteps > 0:
+                        totalSteps -= 1
+                        self.currentPosX += 1
+                    while self.currentPosY > destination[1] and totalSteps > 0:
+                        totalSteps -= 1
+                        self.currentPosY -= 1
+                    while self.currentPosY < destination[1] and totalSteps > 0:
+                        totalSteps -= 1
+                        self.currentPosY += 1
 
-        while arrived == False:
-            while self.currentPosX > destination[0]:
-                totalSteps -= 1
-                self.currentPosX -= 1
-            while self.currentPosX < destination[0]:
-                totalSteps -= 1
-                self.currentPosX += 1
-            while self.currentPosY > destination[1]:
-                totalSteps -= 1
-                self.currentPosY -= 1
-            while self.currentPosY < destination[1]:
-                totalSteps -= 1
-                self.currentPosY += 1
-
-            arrived = True
-            
-        # self.playGround.getStatus(destination[0], destination[1])
-        self.playGround.setStatus(destination[0], destination[1], 999)
-        self.playGround.getStatus(destination[0], destination[1]) 
-        print("remaining steps taken:",totalSteps)
+                    arrived = True
+                self.playGround.setStatus(destination[0], destination[1], 999)
+            print("remaining steps taken:",totalSteps)
 
     def goLeft(self):
         if currentPos[0] > 0:
@@ -117,7 +119,7 @@ class Agent:
     
 rooma = Agent()
 print("____")
-rooma.move(75)
+rooma.move(7500000)
 print("____")
 rooma.printArea()
 print("____")
