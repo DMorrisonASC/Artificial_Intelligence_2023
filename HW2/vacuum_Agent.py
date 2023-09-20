@@ -100,6 +100,7 @@ class Agent:
                     arrived = True
                 self.playGround.setStatus(destination[0], destination[1], 999)
         print("remaining steps left: ",totalSteps)
+        
 
     def goLeft(self):
         if currentPos[0] > 0:
@@ -119,10 +120,19 @@ class Agent:
     def printArea(self):
         self.playGround.printEnvy()
     
-rooma = Agent()
+
 print("____")
-rooma.move(7500000)
-print("____")
+
+dirtySpaceLeft = 0
+avgDirtySpaceLeft = 0
+
+for x in range(100):
+    rooma = Agent()
+    rooma.move(75)
+    scoreList = rooma.scanEnvy()
+    dirtySpaceLeft += len(scoreList)
+
+avgDirtySpaceLeft = dirtySpaceLeft / 100
+
 rooma.printArea()
-print("____")
-print(rooma.currentPos)
+print("Average dirty space left: ", avgDirtySpaceLeft)
