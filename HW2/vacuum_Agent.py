@@ -11,6 +11,7 @@ import math
 class Environment:
     clean = 0
     dirty = 1
+
     def __init__(self, rows, cols):
         #iterate through envy and populate randomly
         self.rows = 10
@@ -18,12 +19,12 @@ class Environment:
         self.envy = [[random.randint(0,1) for i in range(self.rows+2)] for i in range(self.cols+2)]
         
         for x in range(self.rows+2):
-            self.envy[x][0] = 2
-            self.envy[x][self.rows+1] = 2
+            self.envy[x][0] = -1
+            self.envy[x][self.rows+1] = -1
 
         for y in range(self.cols+2):
-            self.envy[0][y] = 2
-            self.envy[self.cols+1][y] = 2
+            self.envy[0][y] = -1
+            self.envy[self.cols+1][y] = -1
 
             
     def getStatus(self, posRow, posCol):
@@ -40,8 +41,8 @@ class Environment:
 class Agent:
     def __init__(self):
         self.playGround = Environment(10,10)
-        self.initalPosX = random.randint(0,10)
-        self.initalPosY = random.randint(0,10)
+        self.initalPosX = random.randint(1,10)
+        self.initalPosY = random.randint(1,10)
         self.currentPosX = int(self.initalPosX)
         self.currentPosY = int(self.initalPosY)
         self.currentPos = [self.currentPosX, self.currentPosY]
