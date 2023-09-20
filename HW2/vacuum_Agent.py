@@ -5,20 +5,8 @@
 # Errors:
 
 import random
-#vacuum agent
+import math
 
-
-class Agent:
-    pass
-    # x=0
-    # y=0
-    # envy1 = Environment
-    # clean()
-
-
-    ##move Left Right Up Down
-    ##clean, or do nothing
-    ##perceive location or status of location
 
 class Environment:
     clean = 0
@@ -39,24 +27,15 @@ class Environment:
 
             
     def getStatus(self, posRow, posCol):
-        print(self.envy[posRow][posCol])
+        return self.envy[posRow][posCol]
 
     def setStatus(self, posRow, posCol, status):
         self.envy[posRow][posCol] = status
-        print(self.envy[posRow][posCol])
-
-    def getDirtySpot(self):
-        pass
-
+        print("New State is at Coors:",self.envy[posRow][posCol])
     
     def printEnvy(self):
         for eachRow in self.envy:
             print(eachRow , "\n")
-
-
-# x = Environment(10,10)
-# x.getStatus(0,3)
-# x.printEnvy()
 
 class Agent:
     def __init__(self):
@@ -65,21 +44,57 @@ class Agent:
         self.initalPosY = random.randint(0,10)
         self.currentPosX = int(self.initalPosX)
         self.currentPosY = int(self.initalPosY)
+        self.currentPos = [self.currentPosX, self.currentPosY]
+        print("Rooma started at points: ",self.initalPosX, self.initalPosY)
         # playGround.printEnvy()
 
-    def move(self, steps, destination, currentPosX, currentPosY):
+    def scanEnvy(self):
+            dirtyList = []
+            for x in range(self.playGround.rows):
+                for y in range(self.playGround.cols):
+                    if (self.playGround.getStatus(x,y) == 1):
+                        dirtyList.append([x,y])
+            return dirtyList
+                
+
+    def findNearest(self):
+            dList = self.scanEnvy()
+            near = 12
+            nearPoint = [12,12]
+            for item in range(len(dList)):
+                dl = dList[item]
+                check = math.sqrt(((dl[0]-self.currentPos[0])**2)+((dl[1]-self.currentPos[1])**2))
+                if (check < near):
+                    near = check
+                    nearPoint = dList[item]
+            return nearPoint
+
+
+    def move(self, steps):
         arrived = False
+        totalSteps = steps
+        destination = self.findNearest()
 
         while arrived == False:
-            for x in destination[0]:
-                if currentPosX > destination[0]:
-                    steps -= 1
-                    currentPosX -= 1
-                elif currentPosX < destination[0]:
-                    pass
+            while self.currentPosX > destination[0]:
+                totalSteps -= 1
+                self.currentPosX -= 1
+            while self.currentPosX < destination[0]:
+                totalSteps -= 1
+                self.currentPosX += 1
+            while self.currentPosY > destination[1]:
+                totalSteps -= 1
+                self.currentPosY -= 1
+            while self.currentPosY < destination[1]:
+                totalSteps -= 1
+                self.currentPosY += 1
 
+            arrived = True
             
-        
+        # self.playGround.getStatus(destination[0], destination[1])
+        self.playGround.setStatus(destination[0], destination[1], 999)
+        self.playGround.getStatus(destination[0], destination[1]) 
+        print("remaining steps taken:",totalSteps)
 
     def goLeft(self):
         if currentPos[0] > 0:
@@ -100,7 +115,12 @@ class Agent:
         self.playGround.printEnvy()
     
 rooma = Agent()
+print("____")
+rooma.move(75)
+print("____")
 rooma.printArea()
+print("____")
+print(rooma.currentPos)
 
 # x.getStatus(0,0)
     #populateEnvy()
