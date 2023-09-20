@@ -1,3 +1,9 @@
+# Author: Daeshaun Morrison & Reema Norford, Muhlenberg College class of 2024(daeshaunkmorrison@gmail.com)
+# Date: 3/21/2023
+# Instructor: Professor Silveyra
+# Description: 
+# Errors:
+
 import random
 #vacuum agent
 
