@@ -4,10 +4,13 @@
 # Description: Students will implement a simple adjacency list
 # Errors:
 
-class Node:
-    def __init__(self, value):
-        self.data = value
-        self.next = None
+# class Node:
+#     def __init__(self, value):
+#         self.data = value
+#         self.next = None
+from Node import Node
+from Stack import Stack
+# from Stack import DFS
 
 class AdjList:
     def __init__(self, num):
@@ -29,14 +32,17 @@ class AdjList:
         print("Enter vertice to show vertices connceted to it:")
         verticeNum = int(input())
 
-        vertice = self.graph[verticeNum]
-        print("Vertex " + str(verticeNum) + ":", end="")
-        while vertice:
-            print(" -> {}".format(vertice.data), end="")
-            vertice =  vertice.next
+        if (verticeNum <= len(self.graph) - 1):
+            vertice = self.graph[verticeNum]
+            print("Vertex " + str(verticeNum) + ":", end="")
+            while vertice:
+                print(" -> {}".format(vertice.data), end="")
+                vertice =  vertice.next
+        else:
+            print("Vertice does not exist!")
 
     # Print the graph
-    def print_agraph(self):
+    def print_graph(self):
         for i in range(self.V):
             print("Vertex " + str(i) + ":", end="")
             temp = self.graph[i]
@@ -45,17 +51,39 @@ class AdjList:
                 temp = temp.next
             print(" \n")
 
+    def DFS(self, startP):
+        stack = Stack()
+        stack.push(startP)
+        visited = set()
+
+        while stack.is_empty() == False:
+            eachV = stack.pop()
+    
+            if eachV not in visited:
+                visited.add(eachV)
+
+                while self.graph[eachV]:
+                    stack.push(self.graph[eachV].data)
+                    self.graph[eachV] = self.graph[eachV].next
+
+        print("Path: ",end="")
+        for i in visited:
+            print(i, end=" -> ")
+        
+
 if __name__ == "__main__":
     V = 5
 
     # Create graph and edges
-    graph = AdjList(V)
-    graph.insert(0, 1)
-    graph.insert(0, 2)
-    graph.insert(0, 3)
-    graph.insert(1, 2)
+    Adjacency_List = AdjList(V)
+    Adjacency_List.insert(0, 1)
+    Adjacency_List.insert(0, 2)
+    Adjacency_List.insert(0, 3)
+    Adjacency_List.insert(1, 2)
 
-    graph.print_agraph()
-    graph.print_Vertice()
+    Adjacency_List.print_graph()
+    # graph.print_Vertice()
+
+    DFS_results = Adjacency_List.DFS(0)
 
 
