@@ -10,6 +10,7 @@
 #         self.next = None
 from Node import Node
 from Stack import Stack
+from Queue import MyQueue
 # from Stack import DFS
 
 class AdjList:
@@ -54,17 +55,39 @@ class AdjList:
     def DFS(self, startP):
         stack = Stack()
         stack.push(startP)
-        visited = set()
+        visited = []
 
         while stack.is_empty() == False:
             eachV = stack.pop()
     
             if eachV not in visited:
-                visited.add(eachV)
+                visited.append(eachV)
 
                 while self.graph[eachV]:
                     stack.push(self.graph[eachV].data)
                     self.graph[eachV] = self.graph[eachV].next
+
+        print("Path: ",end="")
+        for i in visited:
+            print(i, end=" -> ")
+
+    def BFS(self, startP):
+        queue = MyQueue(self.V)
+        queue.enque(startP)
+        visited = []
+
+        while queue.is_empty() == False:
+            eachV = queue.deque()
+
+            if eachV not in visited:
+                visited.append(eachV)
+                print(self.graph[eachV])
+
+                while self.graph[eachV]:
+                    print(self.graph[eachV])
+                    queue.enque(self.graph[eachV].data)
+                    self.graph[eachV] = self.graph[eachV].next
+                    print(self.graph[eachV])
 
         print("Path: ",end="")
         for i in visited:
@@ -78,12 +101,10 @@ if __name__ == "__main__":
     Adjacency_List = AdjList(V)
     Adjacency_List.insert(0, 1)
     Adjacency_List.insert(0, 2)
-    Adjacency_List.insert(0, 3)
+    Adjacency_List.insert(0, 3)    
     Adjacency_List.insert(1, 2)
-
     Adjacency_List.print_graph()
     # graph.print_Vertice()
 
-    DFS_results = Adjacency_List.DFS(0)
-
-
+    DFS_results = Adjacency_List.DFS(3)
+    BFS_results = Adjacency_List.BFS(3)
