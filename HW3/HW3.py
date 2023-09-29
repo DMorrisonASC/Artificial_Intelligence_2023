@@ -4,13 +4,10 @@
 # Description: Students will implement a simple adjacency list
 # Errors: 1) Can NOT execute `DFS()` and `BFS()` are the same time 
 
-# class Node:
-#     def __init__(self, value):
-#         self.data = value
-#         self.next = None
 from Node import Node
 from Stack import Stack
 from Queue import MyQueue
+from LinkedList import LinkedList
 # from Stack import DFS
 
 class AdjList:
@@ -18,39 +15,40 @@ class AdjList:
         self.V = num
         self.graph = [None] * self.V
 
-    # Add edges
-    def insert(self, s, d):
-        node = Node(d)
-        node.next = self.graph[s]
-        self.graph[s] = node
+        for x in range(self.V):
+            self.graph[x] = LinkedList()
 
-        node = Node(s)
-        node.next = self.graph[d]
-        self.graph[d] = node
+    # Add edges
+    def insert(self, index, d):
+        selectedLinkedList = self.graph[index]
+        selectedLinkedList.insertAtBegin(d)
+
 
     # print a single  vertice
-    def print_Vertice(self):
-        print("Enter vertice to show vertices connceted to it:")
-        verticeNum = int(input())
+    def print_Vertice(self, index):
+        # print("Enter vertice to show vertices connceted to it:")
+        # verticeNum = int(input())
 
-        if (verticeNum <= len(self.graph) - 1):
-            vertice = self.graph[verticeNum]
-            print("Vertex " + str(verticeNum) + ":", end="")
-            while vertice:
-                print(" -> {}".format(vertice.data), end="")
-                vertice =  vertice.next
-        else:
-            print("Vertice does not exist!")
+        # if (verticeNum <= len(self.graph) - 1):
+        #     vertice = self.graph[verticeNum]
+        #     print("Vertex " + str(verticeNum) + ":", end="")
+        #     while vertice:
+        #         print(" -> {}".format(vertice.data), end="")
+        #         vertice =  vertice.next
+        # else:
+        #     print("Vertice does not exist!")
+        selectedLinkedList = self.graph[index]
+        print("Vertex " + str(index) + ":", end="")
+        selectedLinkedList.printList()
+
 
     # Print the graph
     def print_graph(self):
-        for i in range(self.V):
-            print("Vertex " + str(i) + ":", end="")
-            temp = self.graph[i]
-            while temp:
-                print(" -> {}".format(temp.data), end="")
-                temp = temp.next
-            print(" \n")
+        for index in range(self.V):
+            selectedLinkedList = self.graph[index]
+            print("Vertex " + str(index) + ":", end="")
+            selectedLinkedList.printList()
+            print()
 
     def DFS(self, startP):
         stack = Stack()
@@ -62,10 +60,12 @@ class AdjList:
     
             if eachV not in visited:
                 visited.append(eachV)
+                current_node = self.graph[eachV].getHead()
 
-                while self.graph[eachV]:
-                    stack.push(self.graph[eachV].data)
-                    self.graph[eachV] = self.graph[eachV].next
+                while current_node:
+                    if current_node != None:
+                        stack.push(current_node.data)
+                        current_node = current_node.next
 
         print("Path: ",end="")
         for i in visited:
@@ -81,17 +81,14 @@ class AdjList:
 
             if eachV not in visited:
                 visited.append(eachV)
-
-                while self.graph[eachV]:
-                    queue.enque(self.graph[eachV].data)
-                    self.graph[eachV] = self.graph[eachV].next
+                current_node = self.graph[eachV].getHead()
+                while current_node:
+                    queue.enque(current_node.data)
+                    current_node = current_node.next
 
         print("Path: ",end="")
         for i in visited:
             print(i, end=" -> ")
-
-    
-        
 
 if __name__ == "__main__":
     V = 5
@@ -101,9 +98,9 @@ if __name__ == "__main__":
     Adjacency_List.insert(0, 1)
     Adjacency_List.insert(0, 2)
     Adjacency_List.insert(0, 3)    
-    Adjacency_List.insert(1, 2)
+    Adjacency_List.insert(1, 1)
     Adjacency_List.print_graph()
-    # graph.print_Vertice()
+    # Adjacency_List.print_Vertice(0)
 
-    DFS_results = Adjacency_List.DFS(3)
-    BFS_results = Adjacency_List.BFS(3)
+    DFS_results = Adjacency_List.DFS(0)
+    BFS_results = Adjacency_List.BFS(0)
