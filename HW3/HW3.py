@@ -2,7 +2,7 @@
 # Date: 9/26/2023
 # Instructor: Professor Silveyra
 # Description: Students will implement a simple adjacency list
-# Errors:
+# Errors: 1) Can NOT execute `DFS()` and `BFS()` are the same time 
 
 # class Node:
 #     def __init__(self, value):
@@ -81,17 +81,16 @@ class AdjList:
 
             if eachV not in visited:
                 visited.append(eachV)
-                print(self.graph[eachV])
 
                 while self.graph[eachV]:
-                    print(self.graph[eachV])
                     queue.enque(self.graph[eachV].data)
                     self.graph[eachV] = self.graph[eachV].next
-                    print(self.graph[eachV])
 
         print("Path: ",end="")
         for i in visited:
             print(i, end=" -> ")
+
+    
         
 
 if __name__ == "__main__":
