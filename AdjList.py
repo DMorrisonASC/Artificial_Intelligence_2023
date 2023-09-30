@@ -8,6 +8,7 @@ from Node import Node
 from Stack import Stack
 from Queue import MyQueue
 from LinkedList import LinkedList
+from Heap import MinHeap
 # from Stack import DFS
 
 class AdjList:
@@ -20,23 +21,12 @@ class AdjList:
 
     # Add edges
     def insert(self, index, d):
-        selectedLinkedList = self.graph[index]
+        selectedLinkedList = self.graph[index] 
         selectedLinkedList.insertAtBegin(d)
 
 
     # print a single  vertice
     def print_Vertice(self, index):
-        # print("Enter vertice to show vertices connceted to it:")
-        # verticeNum = int(input())
-
-        # if (verticeNum <= len(self.graph) - 1):
-        #     vertice = self.graph[verticeNum]
-        #     print("Vertex " + str(verticeNum) + ":", end="")
-        #     while vertice:
-        #         print(" -> {}".format(vertice.data), end="")
-        #         vertice =  vertice.next
-        # else:
-        #     print("Vertice does not exist!")
         selectedLinkedList = self.graph[index]
         print("Vertex " + str(index) + ":", end="")
         selectedLinkedList.printList()
@@ -90,6 +80,46 @@ class AdjList:
         for i in visited:
             print(i, end=" -> ")
 
+    def Dijkstras(self, startPoint, endPoint):
+        # Set placeholder distances to show un-traversed nodes
+        distances = {vertex: 999 for vertex in range(self.V)}
+        distances[startPoint] = 0
+        previous = {vertex: None for vertex in range(self.V)}
+        # Use queue since unweighted
+        queue = MyQueue(self.V)
+        queue.enque(startPoint)
+
+        while not queue.is_empty():
+            currentVertex = queue.deque()
+
+            if currentVertex == endPoint:
+                break
+
+            current_node = self.graph[currentVertex].getHead()
+            while current_node:
+                neighbor = current_node.data
+                if distances[neighbor] == 999:
+                    distances[neighbor] = distances[currentVertex] + 1
+                    previous[neighbor] = currentVertex
+                    queue.enque(neighbor)
+                current_node = current_node.next
+
+        shortestPath = []
+        currentVertex = endPoint
+        while currentVertex is not None:
+            shortestPath.insert(0, currentVertex)
+            currentVertex = previous[currentVertex]
+
+        if shortestPath:
+            print(f"Shortest path from {startPoint} to {endPoint}: {' -> '.join(map(str, shortestPath))}")
+        else:
+            print(f"No path exists from {startPoint} to {endPoint}")
+    
+    def remove_connect(self, index, connection):
+        linkedL = self.graph[index]
+        print(type(linkedL))
+        linkedL.remove_node(int(connection))
+
 if __name__ == "__main__":
     V = 5
 
@@ -97,10 +127,14 @@ if __name__ == "__main__":
     Adjacency_List = AdjList(V)
     Adjacency_List.insert(0, 1)
     Adjacency_List.insert(0, 2)
-    Adjacency_List.insert(0, 3)    
+    Adjacency_List.insert(1, 0)    
     Adjacency_List.insert(1, 1)
     Adjacency_List.print_graph()
     # Adjacency_List.print_Vertice(0)
 
+    # Adjacency_List.remove_connect(0,2)
+    # Adjacency_List.print_graph()
+
     DFS_results = Adjacency_List.DFS(0)
     BFS_results = Adjacency_List.BFS(0)
+    Adjacency_List.Dijkstras(1,2)
