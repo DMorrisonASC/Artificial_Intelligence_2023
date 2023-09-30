@@ -90,13 +90,23 @@ class LinkedList:
     def remove_node(self, data):
         current_node = self.head
 
-        while(current_node != None and current_node.next.data != data):
-            current_node = current_node.next
+        while (current_node != None):
 
-        if current_node == None:
-            return
-        else:
-            current_node.next = current_node.next.next
+            if (current_node.data == data):
+                self.remove_begin()
+                return
+            if (current_node.next != None):
+                print("Node does not exist")
+                return
+
+            elif (current_node.next.data != data):
+                current_node = current_node.next
+            else:
+                print(data, " was successfully removed")
+                current_node.next = current_node.next.next
+                return
+
+        print("Node does not exist")
 
     # Print the size of linked list
     def sizeOfList(self):
