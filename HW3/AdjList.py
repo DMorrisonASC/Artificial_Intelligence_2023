@@ -120,21 +120,20 @@ class AdjList:
         print(type(linkedL))
         linkedL.remove_node(int(connection))
 
-if __name__ == "__main__":
-    V = 5
+    def write_to_file(self):
+        # Create a file for writing the outputs
+        file_name = "output.txt"
+        f = open(file_name, "w")
+        f.write(str(self.V))
+        with open(file_name, "w") as file:
+            # Write all the vertices and edges to the file
+            for x in range(self.V):
+                selectedL = self.graph[x]
+                if selectedL != None:
+                    sel_head = selectedL.getHead()
+                    while sel_head:
+                        eachLineOut = str(x) +  " " + str(selectedL.getHead().data) + "\n"
+                        file.write(eachLineOut)
+                        sel_head = sel_head.next
 
-    # Create graph and edges
-    Adjacency_List = AdjList(V)
-    Adjacency_List.insert(0, 1)
-    Adjacency_List.insert(0, 2)
-    Adjacency_List.insert(1, 0)    
-    Adjacency_List.insert(1, 1)
-    Adjacency_List.print_graph()
-    # Adjacency_List.print_Vertice(0)
-
-    # Adjacency_List.remove_connect(0,2)
-    # Adjacency_List.print_graph()
-
-    DFS_results = Adjacency_List.DFS(0)
-    BFS_results = Adjacency_List.BFS(0)
-    Adjacency_List.Dijkstras(1,2)
+        print(f"Check {file_name} for the output!")
