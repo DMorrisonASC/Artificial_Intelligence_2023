@@ -6,15 +6,30 @@
 
 from AdjList import AdjList
 
+def load_file():
+    file_path = input("Enter file path: ")
+    f =  open(file_path, 'r')
+    size = int(f.readline())
+    adjL = AdjList(size)
+
+    # Open the file to read lines
+    try:
+        with open(file_path, 'r') as file:
+            file.readline()
+            for line in file:
+                points = line.split()
+                adjL.insert(int(points[0]) + 1, int(points[1]) + 1)
+
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+
+    return adjL
+
 if __name__ == "__main__":
 
-    V = 5
-
-    Adjacency_List = AdjList(V)
-    Adjacency_List.insert(0, 1)
-    Adjacency_List.insert(0, 2)
-    Adjacency_List.insert(1, 0)    
-    Adjacency_List.insert(1, 1)
+    Adjacency_List = load_file()
 
     while True:
         print("Menu:")
@@ -39,7 +54,7 @@ if __name__ == "__main__":
         elif choice == '3':
             Adjacency_List.insert(1, 1)
         elif choice == '4':
-            print("You selected Option 4")
+            Adjacency_List.write_to_file()
         elif choice == '5':
             print("Exiting the menu...")
             break
