@@ -320,12 +320,13 @@ print(astar_path)
 # else:
 #     print(f"No path found from {start_node} to {goal_node}")
 
-for x in range (100):
+for x in range(100):
     DFS_path = g.DFS(start_node)
     BFS_path = g.BFS(start_node)
     ucs_path = g.uniform_cost_search(start_node)
     gbfs_path = g.greedy_best_first_search(start_node)
     astar_path = g.a_star_search(start_node)
+
 print(g.dfsAvg/100)
 print(g.bfsAvg/100)
 print(g.ucsAvg/100)
