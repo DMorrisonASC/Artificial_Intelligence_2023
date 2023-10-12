@@ -5,13 +5,18 @@ from Updated_Vacuum_Agent import Agent
 import random
 import math
 
-random.seed(10)
+# random.seed(10)
 
 class Graph:
     def __init__(self):
         # init dictionary
         self.graph = {}
         self.agent = Agent()
+        self.dfsAvg = 0
+        self.bfsAvg = 0
+        self.ucsAvg = 0
+        self.gbsAvg = 0
+        self.asAvg = 0
 
     def create_ran_graph(self):
         #y values
@@ -130,6 +135,7 @@ class Graph:
             
             if node == exit:
                 # print(str(path))
+                self.dfsAvg += len(path)
                 return path
             
             if node in self.graph:
@@ -160,6 +166,7 @@ class Graph:
             path = path + [node]
             
             if node == exit:
+                self.bfsAvg += len(path)
                 return path
             
             if node in self.graph:
@@ -187,6 +194,7 @@ class Graph:
             path = path + [node]
             
             if node == exit:
+                self.ucsAvg += len(path)
                 return path
             
             if node in self.graph:
@@ -216,6 +224,7 @@ class Graph:
             path = path + [node]
             
             if node == exit:
+                self.gbsAvg += len(path)
                 return path
             
             if node in self.graph:
@@ -246,6 +255,7 @@ class Graph:
             path = path + [node]
             
             if node == exit:
+                self.asAvg += len(path)
                 return path
             
             if node in self.graph:
@@ -275,6 +285,7 @@ start_node = 0
 # DFS
 DFS_path = g.DFS(start_node)
 print(DFS_path)
+
 # print(f"DFS Path from {start_node} to {goal_node}: {' -> '.join(str(DFS_path))}")
 
 # BFS
@@ -292,7 +303,7 @@ print(ucs_path)
 #     print(f"Uniform Cost Search Path from {start_node} to {goal_node}: {' -> '.join(ucs_path)}")
 # else:
 #     print(f"No path found from {start_node} to {goal_node}")
-g.set_heuristic()
+
 # Greedy Best-First Search
 gbfs_path = g.greedy_best_first_search(start_node)
 print(gbfs_path)
@@ -308,3 +319,15 @@ print(astar_path)
 #     print(f"A* Search Path from {start_node} to {goal_node}: {' -> '.join(astar_path)}")
 # else:
 #     print(f"No path found from {start_node} to {goal_node}")
+
+for x in range (100):
+    DFS_path = g.DFS(start_node)
+    BFS_path = g.BFS(start_node)
+    ucs_path = g.uniform_cost_search(start_node)
+    gbfs_path = g.greedy_best_first_search(start_node)
+    astar_path = g.a_star_search(start_node)
+print(g.dfsAvg/100)
+print(g.bfsAvg/100)
+print(g.ucsAvg/100)
+print(g.gbsAvg/100)
+print(g.asAvg/100)
