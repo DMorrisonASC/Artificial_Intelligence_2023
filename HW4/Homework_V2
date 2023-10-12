@@ -1,3 +1,9 @@
+# Author: Daeshaun Morrison & Reema Norford, Muhlenberg College class of 2024(daeshaunkmorrison@gmail.com)
+# Date: 3/21/2023
+# Instructor: Professor Silveyra
+# Description: A vacuum agent that cleans dirty spots(indexes with value = 1) in X steps given
+# Errors: The cost of each node are randomly generated as opposed to remaining the same
+
 from Queue import MyQueue
 from Stack import Stack
 from Heap import MinHeap
