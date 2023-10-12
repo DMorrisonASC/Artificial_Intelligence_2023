@@ -2,8 +2,7 @@
 # Date: 3/21/2023
 # Instructor: Professor Silveyra
 # Description: A vacuum agent that cleans dirty spots(indexes with value = 1) in X steps given
-# Errors: The cost of each node are randomly generated as opposed to remaining the same
-
+# Errors: A few times the `Random.seed()` would provide `None` values resulting in the whiole graph not existing
 from Queue import MyQueue
 from Stack import Stack
 from Heap import MinHeap
@@ -23,7 +22,14 @@ class Graph:
         self.ucsAvg = 0
         self.gbsAvg = 0
         self.asAvg = 0
-
+        #
+        self.dfsFound = 0
+        self.bfsFound = 0
+        self.uscFound = 0
+        self.gbsFound = 0
+        self.asFound = 0
+    # Create a random adj list where the formation minics a 2D array; Nodes should only point to nodes around it by "one step"(Up, down, left, right)
+    # if there is a node beside it
     def create_ran_graph(self):
         #y values
         adjMat = [[],[],[],[],[],[],[],[],[],[]]
@@ -77,12 +83,18 @@ class Graph:
                         newMat.append(((y+1)*10) + x)
                         adjMat[y].append(newMat)
         index = 0
+        seed_value = 10
+        random.seed(seed_value)
+        # Create pseudo-random number for the cost of all nodes
         for x in range (len(adjMat)):
             for currentRow in range (len(adjMat[x])):   
                 for connection in adjMat[x][currentRow]:
                     randCost = random.randint(0, 20)
                     self.add_edge(index, connection, randCost)
+                    seed_value += 1
                 index += 1
+        # Reset seed to `None` so that the rest of the program is unaffected
+        random.seed(None)
 
     def get_graph_size(self):
         return len(self.graph)
@@ -91,7 +103,12 @@ class Graph:
         if start not in self.graph:
             self.graph[start] = []
         self.graph[start].append([end, cost])
-
+    # The environment will have 4 possible states: 
+    # 0 - empty cell
+    # 1 - wall
+    # 2 - visited cell
+    # 3 - exit
+    # Method gets the states from Agent class
     def get_states(self):
         walls = []
         goal = 0
@@ -104,7 +121,8 @@ class Graph:
                     goal = index
                 index += 1
         return walls, goal
-
+    
+    # Calculate the heuristic from start node every node
     def set_heuristic(self):
 
         states = self.get_states()
@@ -116,7 +134,6 @@ class Graph:
                 value = math.sqrt((((exit//10) - y)**2)+(((exit % 10) - x)**2))
                 heur[x].append(value)
                 index += 1
-        # print(heur)
         return heur
 
     def DFS(self, start):
@@ -140,8 +157,8 @@ class Graph:
             path = path + [node]
             
             if node == exit:
-                # print(str(path))
                 self.dfsAvg += len(path)
+                self.dfsFound += 1
                 return path
             
             if node in self.graph:
@@ -173,6 +190,7 @@ class Graph:
             
             if node == exit:
                 self.bfsAvg += len(path)
+                self.bfsFound += 1
                 return path
             
             if node in self.graph:
@@ -201,6 +219,7 @@ class Graph:
             
             if node == exit:
                 self.ucsAvg += len(path)
+                self.uscFound += 1
                 return path
             
             if node in self.graph:
@@ -231,6 +250,7 @@ class Graph:
             
             if node == exit:
                 self.gbsAvg += len(path)
+                self.gbsFound += 1
                 return path
             
             if node in self.graph:
@@ -262,6 +282,7 @@ class Graph:
             
             if node == exit:
                 self.asAvg += len(path)
+                self.asFound += 1
                 return path
             
             if node in self.graph:
@@ -302,7 +323,7 @@ print(BFS_path)
 # else:
 #     print(f"No path found from {start_node} to {goal_node}")
 
-# # Uniform Cost Search
+# Uniform Cost Search
 ucs_path = g.uniform_cost_search(start_node)
 print(ucs_path)
 # if ucs_path:
@@ -338,3 +359,9 @@ print(g.bfsAvg/100)
 print(g.ucsAvg/100)
 print(g.gbsAvg/100)
 print(g.asAvg/100)
+
+print(f"DFS found the path " + str(g.dfsFound) + " time(s)") 
+print(f"BFS found the path " + str(g.bfsFound) + " time(s)") 
+print(f"USC found the path " + str(g.uscFound) + " time(s)") 
+print(f"GBS found the path " + str(g.gbsFound) + " time(s)") 
+print(f"A-star found the path " + str(g.asFound) + " time(s)") 
