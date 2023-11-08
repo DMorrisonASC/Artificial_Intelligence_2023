@@ -52,21 +52,30 @@ class N_grams:
     def print_bigrams(self, current_word, prev_word):
         combin = prev_word + " " + current_word
         print('"{}" occurs {} time(s)'.format(combin, self.bigram.get(combin, 0)))
-        #
-        prob = (self.unigram.get(current_word, 1) + self.unigram.get(prev_word, 1)) / self.unigram.get(prev_word, 1)
-        print('Probability of {} is {}'.format(combin, prob))
+    
+        # prob = (self.unigram.get(current_word, 1 / len(self.unigram)) + self.unigram.get(prev_word, 1 / len(self.unigram))) / self.unigram.get(prev_word, 1 / len(self.unigram))
+        prob = (self.bigram.get(combin, 2 / len(self.unigram))) / self.unigram.get(prev_word, 1 / len(self.unigram))
+        print('Probability of {} is {:%}'.format(combin, prob))
+        
         return prob
 
     def print_sentence_prob(self, sentence):
         # for eachWord in range(sentence):
         #     pass
         pattern = r'\.(?:\s|\\)' # a regex expression that finds any expression of a puncation mark followed by a space or new line
-        line_convert = re.sub(pattern, " </s><s> ", sentence)
-        print(line_convert) # Print converted line
+        sentence_convert = re.sub(pattern, " </s><s> ", sentence)
+        # print(sentence_convert) # Print converted line
 
-        totalprob = 0
+        totalprob = 1
 
-        # for index in len(line_convert.split()):
+        for index in range(len(sentence_convert.split())):
+            pair = sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index - 1]
+            if index != 0: 
+                prob = (self.bigram.get(pair, 1 / len(self.bigram))) / self.unigram.get(index-1, 1 / len(self.unigram))
+                totalprob = totalprob * prob
+        
+        print('Probability of "{}" is {:%}'.format(sentence, totalprob))
+
 
     # def replace_spec_chars(self, word):
     #     hex_code = 0
@@ -80,3 +89,5 @@ if __name__ == '__main__':
     allGrams.print_unigrams("Theaaaa")
     allGrams.print_bigrams("deal", "good")
     allGrams.print_sentence_prob("I love carts. I love plants.")
+
+
