@@ -4,7 +4,7 @@
 # Description: Implement a program that counts the unigrams and bigrams of a text file using Python.
 # Errors:
 
-import re 
+import re
 
 class N_grams:
     def __init__(self):
@@ -55,16 +55,28 @@ class N_grams:
         #
         prob = (self.unigram.get(current_word, 1) + self.unigram.get(prev_word, 1)) / self.unigram.get(prev_word, 1)
         print('Probability of {} is {}'.format(combin, prob))
+        return prob
 
-    def replace_spec_chars(self, text):
-        pass
+    def print_sentence_prob(self, sentence):
+        # for eachWord in range(sentence):
+        #     pass
+        pattern = r'\.(?:\s|\\)' # a regex expression that finds any expression of a puncation mark followed by a space or new line
+        line_convert = re.sub(pattern, " </s><s> ", sentence)
+        print(line_convert) # Print converted line
 
-    # def 
+        totalprob = 0
+
+        # for index in len(line_convert.split()):
+
+    # def replace_spec_chars(self, word):
+    #     hex_code = 0
+    #     for char in word:
+    #         if char == "." :
+    #         pass
 
 if __name__ == '__main__':
     allGrams =  N_grams()
     allGrams.load_file("pg236.txt")
     allGrams.print_unigrams("Theaaaa")
     allGrams.print_bigrams("deal", "good")
-
-
+    allGrams.print_sentence_prob("I love carts. I love plants.")
