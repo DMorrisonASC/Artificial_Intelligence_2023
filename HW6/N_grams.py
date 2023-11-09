@@ -10,12 +10,14 @@
 # Errors: Original version's probilities may not have  been calculated properly.
 
 import re
+# Improvement 2
 import math
 
 class N_grams:
     def __init__(self):
         self.unigram = dict()
         self.bigram = dict()
+        self.tri_gram = dict()
 
     def load_file(self, fileName):
         f = open(fileName, "r", encoding='utf-8-sig')
@@ -32,6 +34,12 @@ class N_grams:
                     self.add_bigrams(line_convert.split()[i],  line_convert.split()[i+1])
                 except:
                     pass
+            # Add tri-grams
+            for i in range(len(line_convert.split())):
+                try:
+                    self.add_tri_grams(line_convert.split()[i],  line_convert.split()[i+1], line_convert.split()[i+2])
+                except:
+                    pass
 
     def add_unigrams(self, word):
         # Create a new uni-gram key in dictionary if it doesn't exist. If it does exist, increment by 1
@@ -46,8 +54,16 @@ class N_grams:
         try:
             self.bigram[combination] += 1
         except KeyError:
-            self.bigram[combination] = 1 
+            self.bigram[combination] = 1
 
+    def add_tri_grams(self, word1, word2, word3):
+        # Create a new bi-gram key in dictionary if it doesn't exist. If it does exist, increment by 1
+        combination = word1 + " " + word2 + " " + word3
+        try:
+            self.tri_gram[combination] += 1
+        except KeyError:
+            self.Tri_gram[combination] = 1 
+      
     def print_unigrams(self, word): 
         print('"{}" appears {} time(s)'.format(word, self.unigram.get(word, 0)))
         print('"{}" appears {} time(s) at the beginning of a sentence'.format(word, self.bigram.get("</s><s>" + " " + word, 0)))
@@ -56,6 +72,7 @@ class N_grams:
         for key in self.bigram.keys(): # Find all keys that have `word` as a seperate word
             if word + " " in key or " " + word in key:
                 print('"{}" appears {} time(s)'.format(key, self.bigram.get(key, 0)))
+        print("--------------")
 
     def print_bigrams(self, current_word, prev_word):
         combin = prev_word + " " + current_word
@@ -66,26 +83,50 @@ class N_grams:
         # Improvement 1
         prob = (self.bigram.get(combin, 0)) +  1 / (self.unigram.get(prev_word, 0) + abs(len(self.unigram)))
         print('Probability of {} is {}'.format(combin, prob))
-        
-        return prob
+        print("--------------")
+
+
+    def print_tri_grams(self, current_word, prev_word, prev_prev_word):
+        combin = prev_prev_word + " " + prev_word + " " + current_word
+
+        print('"{}" occurs {} time(s)'.format(combin, self.tri_gram.get(combin, 0)))
+        # Calculate probability of a tri-gram
+        prob = (self.tri_gram.get(combin, 0)) +  1 / (self.bigram.get(prev_prev_word + " " + prev_word, 0) + abs(len(self.unigram)))
+        print('Probability of "{}" is {}'.format(combin, prob))
+        print("--------------")
 
     def print_sentence_prob(self, sentence):
         pattern = r'\.(?:\s|\\)' # a regex expression that finds any expression of a puncation mark followed by a space or new line
         sentence_convert = re.sub(pattern, " </s><s> ", sentence)
 
         totalprob = 0
-        # Calculate probability of a bi-gram
-        for index in range(len(sentence_convert.split())):
-            pair = sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index]
-            print(pair)
-            if index > 0: 
-                log_prob = math.log10(self.bigram.get(pair, 1)) +  1 / (self.unigram.get(index -1, 1) + abs(len(self.unigram)))
-                totalprob = totalprob + log_prob
+
+        for index in range(0, len(sentence_convert.split())):
+            if len(sentence_convert.split()) >= 2:
+                trio = sentence_convert.split()[index - 2] + " " + sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index]
+
+                if index > 1: 
+                    # Improvement 4
+                    # log_prob = math.log10(self.tri_gram.get(trio, 0)) +  1 / (self.bigram.get(sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index - 2], 0) + abs(len(self.unigram)))
+                    log_prob = math.log10(self.tri_gram.get(trio, 1)) +  1 / (self.bigram.get(str(sentence_convert.split()[index - 2]) + " " + str(sentence_convert.split()[index - 1]), 1) + abs(len(self.unigram)))
+                    totalprob = totalprob + log_prob
+                    
+            elif len(sentence_convert.split()) >= 1:
+                pair = sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index]
+                if index > 0: 
+                    # Improvement 3
+                    log_prob = math.log10(self.bigram.get(pair, 1)) +  1 / (self.unigram.get(index - 1, 1) + abs(len(self.unigram)))
+                    totalprob = totalprob + log_prob
         print('Probability of "{}" is {}'.format(sentence, totalprob))
+        print("--------------")
+
+
+    
 
 if __name__ == '__main__':
     allGrams =  N_grams()
     allGrams.load_file("pg236.txt")
     allGrams.print_unigrams("good")
     allGrams.print_bigrams("deal", "good")
-    allGrams.print_sentence_prob("Good deal")
+    allGrams.print_tri_grams("is", "deal", "good")
+    allGrams.print_sentence_prob("Good deal is up")
