@@ -24,7 +24,8 @@ class Tester:
         print("1. Search for unigram")
         print("2. Search for bigram")
         print("3. Sentence probability")
-        print("4. Exit")
+        print("4. Search for bigram")
+        print("5. Exit")
 
         try:
             choice = int(input("Enter your choice (1-4): "))
@@ -34,7 +35,7 @@ class Tester:
 
         if choice == 1:
             find_word1 = str(input("Enter word: ").strip())
-            allGrams.print_unigrams(find_word)
+            allGrams.print_unigrams(find_word1)
         elif choice == 2:
             first_Word = str(input("Enter 1st word: ").strip())
             sec_Word = str(input("Enter 2nd word: ").strip())
@@ -44,6 +45,12 @@ class Tester:
             allGrams.print_sentence_prob(sentence)
 
         elif choice == 4:
+            first_Word = str(input("Enter 1st word: ").strip())
+            sec_Word = str(input("Enter 2nd word: ").strip())
+            third_Word = str(input("Enter 3nd word: ").strip())
+            allGrams.print_tri_grams(third_Word, sec_Word, first_Word)
+
+        elif choice == 5:
             # Exit the loop
             print("Exiting the program....")
         else:
