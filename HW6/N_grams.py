@@ -1,10 +1,16 @@
 # Author: Daeshaun Morrison, Muhlenberg College class of 2024(daeshaunkmorrison@gmail.com)
 # Date: 
 # Instructor: Professor Silveyra
-# Description: Implement a program that counts the unigrams and bigrams of a text file using Python.
-# Errors:
+# Description: Implement a program that counts the unigrams and bigrams of a text file using Python. Improvements:
+# 1) Originally: `prob = (self.bigram.get(combin, 2 / len(self.unigram))) / self.unigram.get(prev_word, 1 / len(self.unigram))`
+# Updated: `prob = (self.bigram.get(combin, 0)) +  1 / (self.unigram.get(prev_word, 0) + abs(len(self.unigram)))` in `print_bigrams()`
+# 2) Imported `math` library
+# 3) Originally: `prob = (self.bigram.get(pair, 1)) / self.unigram.get(index-1, 1)` in `print_sentence_prob()` method
+# Updated: `log_prob = math.log10(self.bigram.get(pair, 1)) +  1 / (self.unigram.get(index -1, 1) + abs(len(self.unigram)))`
+# Errors: Original version's probilities may not have  been calculated properly.
 
 import re
+import math
 
 class N_grams:
     def __init__(self):
@@ -55,7 +61,10 @@ class N_grams:
         combin = prev_word + " " + current_word
         print('"{}" occurs {} time(s)'.format(combin, self.bigram.get(combin, 0)))
         # Calculate probability of a bi-gram
-        prob = (self.bigram.get(combin, 2 / len(self.unigram))) / self.unigram.get(prev_word, 1 / len(self.unigram))
+
+        # prob = (self.bigram.get(combin, 2 / len(self.unigram))) / self.unigram.get(prev_word, 1 / len(self.unigram))
+        # Improvement 1
+        prob = (self.bigram.get(combin, 0)) +  1 / (self.unigram.get(prev_word, 0) + abs(len(self.unigram)))
         print('Probability of {} is {}'.format(combin, prob))
         
         return prob
@@ -64,25 +73,19 @@ class N_grams:
         pattern = r'\.(?:\s|\\)' # a regex expression that finds any expression of a puncation mark followed by a space or new line
         sentence_convert = re.sub(pattern, " </s><s> ", sentence)
 
-        totalprob = 1
+        totalprob = 0
         # Calculate probability of a bi-gram
         for index in range(len(sentence_convert.split())):
-            pair = sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index - 1]
-            if index != 0: 
-                prob = (self.bigram.get(pair, 1 / len(self.bigram))) / self.unigram.get(index-1, 1 / len(self.unigram))
-                totalprob = totalprob * prob
-        
+            pair = sentence_convert.split()[index - 1] + " " + sentence_convert.split()[index]
+            print(pair)
+            if index > 0: 
+                log_prob = math.log10(self.bigram.get(pair, 1)) +  1 / (self.unigram.get(index -1, 1) + abs(len(self.unigram)))
+                totalprob = totalprob + log_prob
         print('Probability of "{}" is {}'.format(sentence, totalprob))
-        
-    # def replace_spec_chars(self, word):
-    #     hex_code = 0
-    #     for char in word:
-    #         if char == "." :
-    #         pass
 
 if __name__ == '__main__':
     allGrams =  N_grams()
     allGrams.load_file("pg236.txt")
     allGrams.print_unigrams("good")
     allGrams.print_bigrams("deal", "good")
-    allGrams.print_sentence_prob("I love carts. I love plants.")
+    allGrams.print_sentence_prob("Good deal")
