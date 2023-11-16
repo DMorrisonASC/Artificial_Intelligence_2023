@@ -55,9 +55,9 @@ def calculate_spam_probability(email, knowledge_json, total_ham_files, total_spa
         spam_probability_of_file += word_prob
     
     if ham_probability_of_file > spam_probability_of_file:
-        return "spam"
-    else:
         return "ham"
+    else:
+        return "spam"
 
 
 
@@ -68,7 +68,7 @@ def get_unique_tokens(ham_json, spam_json):
 
     return unique_token_total
 
-def filter(ham_directory, spam_directory, knowledge_file):
+def filter(ham_directory, spam_directory, knowledge_file, display_messages=True):
     # Inital counter of files in a directory
     num_ham_docs = 0
     num_spam_docs = 0
@@ -96,7 +96,8 @@ def filter(ham_directory, spam_directory, knowledge_file):
 
             real_label = "Ham"  # Since it is reading from ham directory
 
-            print(f"Message {filename}: {result}. Real: {real_label}")
+            if display_messages:
+                print(f"Message {filename}: {result}. Real: {real_label}")
 
     for filename in os.listdir(spam_directory):
         num_spam_docs += 1
@@ -107,13 +108,10 @@ def filter(ham_directory, spam_directory, knowledge_file):
             result = calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens)
             real_label = "Spam"  # Since we are reading from spam directory
 
-            print(f"Message {filename}: {result}. Real: {real_label}")
+            if display_messages:
+                print(f"Message {filename}: {result}. Real: {real_label}")
 
 if __name__ == "__main__":
+    # to disable messages turn display to false
     filter("Enron2/ham", "Enron2/spam", "knowledge.json")
 
-    # json_file = open("knowledge.json", 'r')
-    # knowledge = json.load(json_file)
-    # json_file.close()
-
-    # calculate_spam_probability("The email is not spam. My body is ready", knowledge)
