@@ -23,21 +23,52 @@ class Filter:
         self.folder_name = ""
 
 
-    def preprocess_email(self, text):
-        stop_words = set(stopwords.words('english'))
-        lemmatizer = WordNetLemmatizer()
-        words = []
-        for each_word in text.split():
-            if each_word.isalpha():
-                if each_word.lower() not in stop_words:
+    def preprocess_email(self, text, version):
+        # Remove removing stopwords and lemmatization
+        if (version == 1):
+            stop_words = set(stopwords.words('english'))
+            lemmatizer = WordNetLemmatizer()
+            words = []
+            for each_word in text.split():
+                if each_word.isalpha():
+                    if each_word.lower() not in stop_words:
+                        lem_word = lemmatizer.lemmatize(each_word.lower())
+                        words.append(lem_word)
+            return words
+        # Only removing stopwords
+        elif (version == 2):
+            stop_words = set(stopwords.words('english'))
+            words = []
+            for each_word in text.split():
+                if each_word.isalpha():
+                    if each_word.lower() not in stop_words:
+                        words.append(each_word.lower())
+            return words
+        # Only lemmatization
+        elif (version == 3):
+            lemmatizer = WordNetLemmatizer()
+            words = []
+            for each_word in text.split():
+                if each_word.isalpha():
                     lem_word = lemmatizer.lemmatize(each_word.lower())
                     words.append(lem_word)
+            return words
+        
+        # No improvements
+        elif (version == 4):
+            words = []
+            for each_word in text.split():
+                if each_word.isalpha():
+                    words.append(each_word.lower())
+            return words
+        
+        # Error checking
+        else:
+            print("Check `preprocess_email()` method!")
 
-        return words
+    def calculate_spam_probability(self, email, knowledge_json, total_ham_files, total_spam_files, total_distinct_tokens, version):
 
-    def calculate_spam_probability(self, email, knowledge_json, total_ham_files, total_spam_files, total_distinct_tokens ):
-
-        words = self.preprocess_email(email)
+        words = self.preprocess_email(email, version)
 
         ham_probability_of_file = 0
         spam_probability_of_file = 0
@@ -83,7 +114,7 @@ class Filter:
 
         return unique_token_total
 
-    def filter_files(self, ham_directory, spam_directory, knowledge_file, display_messages):
+    def filter_files(self, ham_directory, spam_directory, knowledge_file, display_messages, version):
         # Inital counter of files in a directory
         num_ham_docs = 0
         num_spam_docs = 0
@@ -116,7 +147,7 @@ class Filter:
             with open(os.path.join(ham_directory, filename), 'r', errors='ignore') as file:
                 message = file.read()
 
-                result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens)
+                result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens, version)
 
                 real_label = "Ham"  # Since it is reading from ham directory
 
@@ -131,7 +162,7 @@ class Filter:
                 
                 message = file.read()
 
-                result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens)
+                result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens, version)
                 real_label = "Spam"  # Since it is reading from spam directory
 
                 if display_messages:
@@ -139,6 +170,8 @@ class Filter:
 
                 self.add_result(result, real_label)
         self.report_stats()
+        # The very last method to run
+        self.report_stats
 
     def add_result(self, prediction, real):
         if (prediction == "Spam" and real == "Spam"):
@@ -151,6 +184,12 @@ class Filter:
             self.fn += 1 # False negative
         else:
             print("Check the input of `add_result()`!!")
+    
+    def reset_outcomes(self):
+        self.tp = 0
+        self.fp = 0
+        self.tn = 0
+        self.fn = 0
 
     def report_stats(self):
         # Accuracy Stats
@@ -163,4 +202,11 @@ class Filter:
 if __name__ == "__main__":
     # to disable messages turn display to false and vice versa
     test = Filter()
-    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False)
+    print("\nStatistics when remove removing stopwords and lemmatization")
+    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False, 1)
+    print("\nStatistics when remove removing stopwords")
+    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False, 2)
+    print("\nStatistics when using lemmatization")
+    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False, 3)
+    print("\nStatistics with not improvements")
+    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False, 4)
