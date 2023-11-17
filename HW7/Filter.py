@@ -4,20 +4,8 @@ import math
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from collections import Counter
+from Learn import preprocess_email
 
-# finish calculate_spam_probability()
-
-def preprocess_email(text):
-    stop_words = set(stopwords.words('english'))
-    lemmatizer = WordNetLemmatizer()
-    words = []
-    for each_word in text.split():
-        if each_word.isalpha():
-            if each_word.lower() not in stop_words:
-                lem_word = lemmatizer.lemmatize(each_word.lower())
-                words.append(lem_word)
-
-    return words
 
 def calculate_spam_probability(email, knowledge_json, total_ham_files, total_spam_files, total_distinct_tokens ):
 
@@ -68,7 +56,7 @@ def get_unique_tokens(ham_json, spam_json):
 
     return unique_token_total
 
-def filter(ham_directory, spam_directory, knowledge_file, display_messages=True):
+def filter(ham_directory, spam_directory, knowledge_file, display_messages):
     # Inital counter of files in a directory
     num_ham_docs = 0
     num_spam_docs = 0
@@ -106,12 +94,13 @@ def filter(ham_directory, spam_directory, knowledge_file, display_messages=True)
             message = file.read()
 
             result = calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens)
-            real_label = "Spam"  # Since we are reading from spam directory
+            real_label = "Spam"  # Since it is reading from spam directory
 
             if display_messages:
                 print(f"Message {filename}: {result}. Real: {real_label}")
 
+
+
 if __name__ == "__main__":
     # to disable messages turn display to false
-    filter("Enron2/ham", "Enron2/spam", "knowledge.json")
-
+    filter("Enron2/ham", "Enron2/spam", "knowledge.json", True)
