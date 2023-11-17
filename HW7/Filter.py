@@ -1,3 +1,11 @@
+# Author: Daeshaun Morrison, Muhlenberg College class of 2024(daeshaunkmorrison@gmail.com)
+# Date: 11/12/2023
+# Instructor: Professor Silveyra
+# Description: The purpose of this assignment is to help you learn about spam filters and naive Bayesian learning.
+# Errors:
+# Helpful sources: https://pieriantraining.com/iterate-over-files-in-directory-using-python/ , 
+# https://www.machinelearningplus.com/nlp/lemmatization-examples-python/, 
+
 import os
 import json
 import math
@@ -67,8 +75,6 @@ class Filter:
         else:
             return "Spam"
 
-
-
     def get_unique_tokens(self, ham_json, spam_json):
 
         keys_ham = set(ham_json.keys())
@@ -132,7 +138,7 @@ class Filter:
                     print(f"Message {filename}: {result}. Real: {real_label}")
 
                 self.add_result(result, real_label)
-
+        self.report_stats()
 
     def add_result(self, prediction, real):
         if (prediction == "Spam" and real == "Spam"):
@@ -148,15 +154,13 @@ class Filter:
 
     def report_stats(self):
         # Accuracy Stats
-        pass
+        accuracy = (self.tp + self.tn) / (self.tp + self.fp + self.fn + self.tn)
+        precision = self.tp / (self.tp + self.fp)
+        recall = self.tp / (self.tp + self.fn)
 
-    
-
-
-
+        print("{} stats\n---------\nAccuracy: {}\nPrecision: {}\nRecall: {}".format(self.folder_name, accuracy, precision, recall))
 
 if __name__ == "__main__":
-    # to disable messages turn display to false
-
+    # to disable messages turn display to false and vice versa
     test = Filter()
     test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False)
