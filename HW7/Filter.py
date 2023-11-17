@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from collections import Counter
@@ -9,8 +10,10 @@ class Filter:
     def __init__(self):
         self.tp = 0
         self.fp = 0
+        self.tn = 0
         self.fn = 0
-        self.fp = 0
+        self.folder_name = ""
+
 
     def preprocess_email(self, text):
         stop_words = set(stopwords.words('english'))
@@ -60,13 +63,14 @@ class Filter:
             spam_probability_of_file += word_prob
         
         if ham_probability_of_file > spam_probability_of_file:
-            return "ham"
+            return "Ham"
         else:
-            return "spam"
+            return "Spam"
 
 
 
     def get_unique_tokens(self, ham_json, spam_json):
+
         keys_ham = set(ham_json.keys())
         keys_spam = set(spam_json.keys())
         unique_token_total = len(keys_ham.symmetric_difference(keys_spam))
@@ -77,6 +81,15 @@ class Filter:
         # Inital counter of files in a directory
         num_ham_docs = 0
         num_spam_docs = 0
+        # Get name of enron folder
+        match = re.search(r'Enron(\d+)/', ham_directory)
+    
+        if match:
+            # Extract the matched word and number
+            self.folder_name = match.group(0)
+            print(self.folder_name)
+        else:
+            print("Error: Folder not found")
 
         with open(knowledge_file, 'r') as json_file:
             knowledge = json.load(json_file)
@@ -104,6 +117,8 @@ class Filter:
                 if display_messages:
                     print(f"Message {filename}: {result}. Real: {real_label}")
 
+                self.add_result(result, real_label)
+
         for filename in os.listdir(spam_directory):
             num_spam_docs += 1
             with open(os.path.join(spam_directory, filename), 'r', errors='ignore') as file:
@@ -116,10 +131,32 @@ class Filter:
                 if display_messages:
                     print(f"Message {filename}: {result}. Real: {real_label}")
 
+                self.add_result(result, real_label)
+
+
+    def add_result(self, prediction, real):
+        if (prediction == "Spam" and real == "Spam"):
+            self.tp += 1 # True Positive
+        elif (prediction == "Spam" and real == "Ham"):
+            self.fp += 1 # False positive
+        elif (prediction == "Ham" and real == "Ham"):
+            self.tn += 1 # True negative
+        elif (prediction == "Ham" and real == "Spam"):
+            self.fn += 1 # False negative
+        else:
+            print("Check the input of `add_result()`!!")
+
+    def report_stats(self):
+        # Accuracy Stats
+        pass
+
+    
+
+
 
 
 if __name__ == "__main__":
     # to disable messages turn display to false
 
     test = Filter()
-    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", True)
+    test.filter_files("Enron2/ham", "Enron2/spam", "knowledge.json", False)
