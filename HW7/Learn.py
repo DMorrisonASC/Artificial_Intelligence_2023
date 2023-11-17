@@ -1,9 +1,17 @@
+# Author: Daeshaun Morrison, Muhlenberg College class of 2024(daeshaunkmorrison@gmail.com)
+# Date: 11/12/2023 
+# Instructor: Professor Silveyra
+# Description: The purpose of this assignment is to help you learn about spam filters and naive Bayesian learning.
+# Errors:
+# Helpful sources: https://pieriantraining.com/iterate-over-files-in-directory-using-python/ , 
+# https://www.machinelearningplus.com/nlp/lemmatization-examples-python/, 
 import os
 import json
 import nltk
 import math
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+
 
 class Learn:
     def __init__(self):
