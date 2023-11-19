@@ -12,7 +12,6 @@ import math
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-
 class Learn:
     def __init__(self):
         pass
@@ -52,6 +51,39 @@ class Learn:
                     except:
                         spam_counter[each_word] = 1
 
+
+        knowledge = {
+            'ham_counter': ham_counter,
+            'spam_counter': spam_counter,
+        }
+
+        with open(output_file, 'w') as json_file:
+            json.dump(knowledge, json_file)
+    
+    def learn_dataset_V2(self, a_fold, output_file):
+        ham_counter = {}
+        spam_counter = {}
+
+        # Find each files in `.\enron1\ham`
+        for each_dict in a_fold:
+            message = each_dict["text"]
+            label = each_dict["label"]
+
+            words = self.preprocess_email(message)
+
+            if label == "Ham":
+                for each_word in words:
+                    try:
+                        ham_counter[each_word] += 1
+                    except:
+                        ham_counter[each_word] = 1
+            
+            elif label == "Spam":
+                for each_word in words:
+                    try:
+                        spam_counter[each_word] += 1
+                    except:
+                        spam_counter[each_word] = 1               
 
         knowledge = {
             'ham_counter': ham_counter,
