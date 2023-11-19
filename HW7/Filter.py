@@ -22,7 +22,6 @@ class Filter:
         self.fn = 0
         self.folder_name = ""
 
-
     def preprocess_email(self, text, version):
         # Remove removing stopwords and lemmatization
         if (version == 1):
@@ -75,9 +74,6 @@ class Filter:
 
         ham_tokens_num = len(knowledge_json['ham_counter'])
         spam_tokens_num = len(knowledge_json['spam_counter'])
-
-        # ham_prob = ham_counter / (ham_counter + spam_counter)
-        # spam_prob = spam_counter / (ham_counter + spam_counter)
 
         ham_doc_prob = total_ham_files / (total_ham_files + total_spam_files)
         spam_doc_prob = total_spam_files / (total_ham_files + total_spam_files)
@@ -142,7 +138,6 @@ class Filter:
             num_spam_docs += 1
 
         for filename in os.listdir(ham_directory):
-            num_ham_docs += 1
 
             with open(os.path.join(ham_directory, filename), 'r', errors='ignore') as file:
                 message = file.read()
@@ -157,7 +152,7 @@ class Filter:
                 self.add_result(result, real_label)
 
         for filename in os.listdir(spam_directory):
-            num_spam_docs += 1
+
             with open(os.path.join(spam_directory, filename), 'r', errors='ignore') as file:
                 
                 message = file.read()
@@ -169,6 +164,69 @@ class Filter:
                     print(f"Message {filename}: {result}. Real: {real_label}")
 
                 self.add_result(result, real_label)
+        self.report_stats()
+        # The very last method to run
+        self.report_stats
+
+    def filter_files_V2(self, a_fold, knowledge_file, display_messages, version):
+        # Inital counter of files in a directory
+        num_ham_docs = 0
+        num_spam_docs = 0
+
+        with open(knowledge_file, 'r') as json_file:
+            knowledge = json.load(json_file)
+
+        total_unique_tokens = self.get_unique_tokens(knowledge['ham_counter'], knowledge['spam_counter'])
+
+        # Calculate number of documents in `ham` and `spam` folders
+        for each_dict in a_fold:
+            label = each_dict["label"]
+
+            if label == "Ham":
+                num_ham_docs += 1
+            elif label == "Spam":
+                num_spam_docs += 1
+
+        for each_dict in a_fold:
+            message = each_dict["text"]
+            label = each_dict["label"]
+            filename = each_dict["filename"]
+
+            if label == "Ham":
+                result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens, version)
+
+                if display_messages:
+                    print(f"Message {filename}: {result}. Real: {label}")
+
+                self.add_result(result, label)
+            
+            elif label == "Spam":
+                result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens, version)
+        
+                if display_messages:
+                    print(f"Message {filename}: {result}. Real: {label}")
+
+                self.add_result(result, label)
+
+            else:
+                print("Error")
+
+            
+
+        # for filename in os.listdir(spam_directory):
+        #     num_spam_docs += 1
+        #     with open(os.path.join(spam_directory, filename), 'r', errors='ignore') as file:
+                
+        #         message = file.read()
+
+        #         result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens, version)
+        #         real_label = "Spam"  # Since it is reading from spam directory
+
+        #         if display_messages:
+        #             print(f"Message {filename}: {result}. Real: {real_label}")
+
+        #         self.add_result(result, real_label)
+
         self.report_stats()
         # The very last method to run
         self.report_stats
