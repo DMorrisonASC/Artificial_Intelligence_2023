@@ -166,7 +166,7 @@ class Filter:
                 self.add_result(result, real_label)
         self.report_stats()
         # The very last method to run
-        self.report_stats
+        self.reset_outcomes()
 
     def filter_files_V2(self, a_fold, knowledge_file, display_messages, version):
         # Inital counter of files in a directory
@@ -211,25 +211,11 @@ class Filter:
             else:
                 print("Error")
 
-            
-
-        # for filename in os.listdir(spam_directory):
-        #     num_spam_docs += 1
-        #     with open(os.path.join(spam_directory, filename), 'r', errors='ignore') as file:
-                
-        #         message = file.read()
-
-        #         result = self.calculate_spam_probability(message, knowledge, num_ham_docs, num_spam_docs, total_unique_tokens, version)
-        #         real_label = "Spam"  # Since it is reading from spam directory
-
-        #         if display_messages:
-        #             print(f"Message {filename}: {result}. Real: {real_label}")
-
-        #         self.add_result(result, real_label)
-
         self.report_stats()
+        all_stats = self.return_stats()
         # The very last method to run
-        self.report_stats
+        self.reset_outcomes()
+        return all_stats
 
     def add_result(self, prediction, real):
         if (prediction == "Spam" and real == "Spam"):
@@ -256,6 +242,14 @@ class Filter:
         recall = self.tp / (self.tp + self.fn)
 
         print("{} stats\n---------\nAccuracy: {}\nPrecision: {}\nRecall: {}".format(self.folder_name, accuracy, precision, recall))
+    
+    def return_stats(self):
+        # Accuracy Stats
+        accuracy = (self.tp + self.tn) / (self.tp + self.fp + self.fn + self.tn)
+        precision = self.tp / (self.tp + self.fp)
+        recall = self.tp / (self.tp + self.fn)
+
+        return [accuracy, precision, recall]
 
 if __name__ == "__main__":
     # to disable messages turn display to false and vice versa
