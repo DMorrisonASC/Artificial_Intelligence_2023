@@ -17,7 +17,7 @@ import requests
 from urllib.parse import urljoin, urlparse
 
 def get_links(html_content, base_url):
-    """Extract the absolute and relative links from HTML content."""
+    """Extracts absolute and relative links from HTML content."""
     absolute_links = re.findall(r'href=["\'](https?://.*?)["\']', html_content)
     relative_links = re.findall(r'href=["\'](.*?)["\']', html_content)
     relative_links = [urljoin(base_url, link) for link in relative_links]
@@ -25,11 +25,12 @@ def get_links(html_content, base_url):
 
 def is_same_domain(url, domain):
     """Checks if the URL belongs to the specified domain."""
+    
     parsed_url = urlparse(url)
     return parsed_url.netloc == domain
 
 def save_page_contents(url, absolute_links, relative_links, html_content, output_dir):
-    """Save the contents of a page into a .txt file."""
+    """Saves the contents of a page in a .txt file."""
     file_name = os.path.join(output_dir, f"{hash(url)}.txt")
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(f"URL: {url}\n")
@@ -37,6 +38,19 @@ def save_page_contents(url, absolute_links, relative_links, html_content, output
         file.write(f"Number of Relative Links: {len(relative_links)}\n")
         file.write("HTML Content:\n")
         file.write(html_content)
+
+def can_fetch(url):
+    """Checks if the URL can be fetched according to robots.txt rules."""
+    parsed_url = urlparse(url)
+    robots_url = f"{parsed_url.scheme}://{parsed_url.netloc}/robots.txt"
+    
+    try:
+        robot_parser = RobotFileParser(robots_url)
+        robot_parser.read()
+        return robot_parser.can_fetch("*", url)
+    except Exception as e:
+        print(f"Error checking robots.txt for {url}: {e}")
+        return True  # Default to allowing fetching if there's an error
 
 def crawl(url, output_dir, domain, max_pages=100):
     """Crawls the given URL and stores the contents of pages in separate .txt files."""
@@ -47,26 +61,34 @@ def crawl(url, output_dir, domain, max_pages=100):
 
     while crawled_pages < max_pages:
         try:
-            response = requests.get(url)
-            if response.status_code == 200 and 'text/html' in response.headers['Content-Type']:
-                html_content = response.text
-                absolute_links, relative_links = get_links(html_content, url)
-                absolute_urls.update(absolute_links)
-                relative_urls.update(relative_links)
+            if can_fetch(url):
+                response = requests.get(url)
+                if response.status_code == 200 and 'text/html' in response.headers['Content-Type']:
+                    html_content = response.text
+                    absolute_links, relative_links = get_links(html_content, url)
+                    absolute_urls.update(absolute_links)
+                    relative_urls.update(relative_links)
 
-                save_page_contents(url, absolute_links, relative_links, html_content, output_dir)
+                    save_page_contents(url, absolute_links, relative_links, html_content, output_dir)
 
-                visited_urls.add(url)
-                crawled_pages += 1
+                    visited_urls.add(url)
+                    crawled_pages += 1
 
-                # Extract new URLs for crawling within the same domain
-                new_urls = {u for u in absolute_links + relative_links if is_same_domain(u, domain)} - visited_urls
-                if not new_urls:
-                    break
-                url = new_urls.pop()
+                    # Extract new URLs for crawling within the same domain
+                    new_urls = {u for u in absolute_links + relative_links if is_same_domain(u, domain)} - visited_urls
+                    if not new_urls:
+                        break
+                    url = new_urls.pop()
+                else:
+                    # Skip non-HTML pages
+                    visited_urls.add(url)
+                    url = next((u for u in absolute_urls.union(relative_urls) if u not in visited_urls and is_same_domain(u, domain)), None)
+                    if url is None:
+                        break
             else:
-                # Skip non-HTML pages
+                print(f"Skipping {url} based on robots.txt rules.")
                 visited_urls.add(url)
+                # next() function returns the next item of an iterator
                 url = next((u for u in absolute_urls.union(relative_urls) if u not in visited_urls and is_same_domain(u, domain)), None)
                 if url is None:
                     break
