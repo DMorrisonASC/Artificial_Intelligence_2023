@@ -14,7 +14,12 @@
 import os
 import re
 import requests
+import time
+import socket
+from urllib.robotparser import RobotFileParser
 from urllib.parse import urljoin, urlparse
+
+socket.setdefaulttimeout(1)
 
 def get_links(html_content, base_url):
     """Extracts absolute and relative links from HTML content."""
@@ -40,7 +45,7 @@ def save_page_contents(url, absolute_links, relative_links, html_content, output
         file.write(html_content)
 
 def can_fetch(url):
-    """Checks if the URL can be fetched according to robots.txt rules."""
+    """Checks if the URL can be fetched based to robots.txt rules."""
     parsed_url = urlparse(url)
     robots_url = f"{parsed_url.scheme}://{parsed_url.netloc}/robots.txt"
     
@@ -50,7 +55,7 @@ def can_fetch(url):
         return robot_parser.can_fetch("*", url)
     except Exception as e:
         print(f"Error checking robots.txt for {url}: {e}")
-        return True  # Default to allowing fetching if there's an error
+        return True  # Default true if error
 
 def crawl(url, output_dir, domain, max_pages=100):
     """Crawls the given URL and stores the contents of pages in separate .txt files."""
@@ -64,6 +69,7 @@ def crawl(url, output_dir, domain, max_pages=100):
             if can_fetch(url):
                 response = requests.get(url)
                 if response.status_code == 200 and 'text/html' in response.headers['Content-Type']:
+                    # print(response)
                     html_content = response.text
                     absolute_links, relative_links = get_links(html_content, url)
                     absolute_urls.update(absolute_links)
@@ -82,16 +88,14 @@ def crawl(url, output_dir, domain, max_pages=100):
                 else:
                     # Skip non-HTML pages
                     visited_urls.add(url)
-                    url = next((u for u in absolute_urls.union(relative_urls) if u not in visited_urls and is_same_domain(u, domain)), None)
-                    if url is None:
-                        break
             else:
                 print(f"Skipping {url} based on robots.txt rules.")
                 visited_urls.add(url)
-                # next() function returns the next item of an iterator
-                url = next((u for u in absolute_urls.union(relative_urls) if u not in visited_urls and is_same_domain(u, domain)), None)
-                if url is None:
-                    break
+            # next() function returns the next item of an iterator
+            url = next((u for u in absolute_urls.union(relative_urls) if u not in visited_urls and is_same_domain(u, domain)), None)
+            if url is None:
+                break
+
         except Exception as e:
             print(f"Error crawling {url}: {e}")
             # next() function returns the next item of an iterator
@@ -106,7 +110,13 @@ def crawl(url, output_dir, domain, max_pages=100):
 
 if __name__ == "__main__":
     start_url = "https://www.muhlenberg.edu/"
+    start_url_sport = "https://muhlenbergsports.com/"
+    
     output_directory = "output"
+
     muhlenberg_domain = "www.muhlenberg.edu"
+    muhlenberg_domain_sport = "muhlenbergsports.com"
+
     os.makedirs(output_directory, exist_ok=True)
     crawl(start_url, output_directory, muhlenberg_domain)
+    # crawl(start_url_sport, output_directory, muhlenberg_domain_sport)
