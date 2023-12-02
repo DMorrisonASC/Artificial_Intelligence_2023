@@ -12,6 +12,7 @@ import requests
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from MaxHeap import MaxHeap
 
 class Inverted_Index:
     def __init__(self):
@@ -106,43 +107,54 @@ class Inverted_Index:
         except:
             df = 0
 
-        # if df != 0:
-        #     return math.log10(self.total_documents/df) + 1
-        # else:
-        #     return 0
-        return df + 1
+        if df != 0:
+            return math.log10(self.total_documents/df)
+        else:
+            return 0
     
     def calc_weight(self, token, document):
-        return self.calc_term_freq(token, document) * self.calc_Idf(token)
+        return (self.calc_term_freq(token, document) * self.calc_Idf(token)) + 1
 
     def get_top_ten_results(self, query, directory):
+        # add query to inverted index
+        words = self.preprocess_page(query)
+        self.update_index(query, words)
+        # Store filenames and Cosine similarity
+        results_dict = {}
 
-        numerator = 0
-        dominator = 0
         # calculate the summation of weights for all tokens and add them to `numerator`
         for filename in os.listdir(directory):
-            for each_token in query.split():
-                weight_ij = self.calc_weight(each_token, filename) 
-                weight_iq = 1
-                numerator += weight_ij * weight_iq
-        # calc dominator
+            numerator = 0
+            dominator = 0
             summation_weight_ij = 0
             summation_weight_iq = 0
+            
             for each_token in query.split():
                 weight_ij = self.calc_weight(each_token, filename) 
+                weight_iq = self.calc_weight(each_token, query)
+                numerator += weight_ij * weight_iq
+            # calc dominator
+            for each_token in query.split():
+                weight_ij = self.calc_weight(each_token, filename) 
+                weight_iq = self.calc_weight(each_token, query)
                 summation_weight_ij += math.pow(weight_ij, 2)
-                summation_weight_iq += math.pow(2, 2)
-            
-            dominator = math.sqrt(summation_weight_ij) * math.sqrt(summation_weight_iq)
-            # print(dominator)
-        print(numerator/dominator)
+                summation_weight_iq += math.pow(weight_iq, 2)
+            # 
+            dominator = (math.sqrt(summation_weight_ij) * math.sqrt(summation_weight_iq)) + 1
+            # print(numerator/dominator, filename) 
+            results_dict[filename] = (numerator/dominator) 
 
-            
+        # Sort the dictionary by values in descending order
+        sorted_items = sorted(results_dict.items(), key=lambda x: x[1], reverse=True)
+        # Creates a new dictionary from the sorted list
+        sorted_results_dict = dict(sorted_items)  
+        for x in sorted_results_dict:
+            print(x, sorted_results_dict[x])
 
 if __name__ == "__main__":
 
     Test = Inverted_Index()
     Test.load_Inverted_Index("output/")
-    Test.get_top_ten_results("var","output/")
+    Test.get_top_ten_results("var play count","output/")
 
     
