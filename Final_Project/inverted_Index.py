@@ -17,6 +17,7 @@ class Inverted_Index:
     def __init__(self):
         self.inverted_index = {}
         self.max_freq = {}
+        self.total_documents = 0
 
     # Adapted from Professor Silveyra
     def parse_HTML(self, html_content):
@@ -65,6 +66,7 @@ class Inverted_Index:
 
     def load_Inverted_Index(self, directory):
         for filename in os.listdir(directory):
+            self.total_documents += 1
             with open(os.path.join(directory, filename), 'r', errors='ignore') as file:
                 words = self.preprocess_page(file.read())
                 self.update_index(filename, words)
@@ -87,24 +89,60 @@ class Inverted_Index:
         #     print(str(eachkey) + ": ")
         #     print(self.max_freq[eachkey])
 
-    def calc_term_freq(self):
-        term = "var"
-        document = "9211442309221931223.txt"
-
+    def calc_term_freq(self, term, document):
         if term in self.inverted_index.keys():
             frequent_num = self.inverted_index.get(term).get(document, 0)
         else:
             frequent_num = 0
 
-        return frequent_num
+        if frequent_num != 0:
+            return frequent_num / self.max_freq.get(document) 
+        else:
+            return 0 
 
+    def calc_Idf(self, term):
+        try:
+            df = len(self.inverted_index.get(term))
+        except:
+            df = 0
 
+        # if df != 0:
+        #     return math.log10(self.total_documents/df) + 1
+        # else:
+        #     return 0
+        return df + 1
+    
+    def calc_weight(self, token, document):
+        return self.calc_term_freq(token, document) * self.calc_Idf(token)
 
+    def get_top_ten_results(self, query, directory):
+
+        numerator = 0
+        dominator = 0
+        # calculate the summation of weights for all tokens and add them to `numerator`
+        for filename in os.listdir(directory):
+            for each_token in query.split():
+                weight_ij = self.calc_weight(each_token, filename) 
+                weight_iq = 1
+                numerator += weight_ij * weight_iq
+        # calc dominator
+            summation_weight_ij = 0
+            summation_weight_iq = 0
+            for each_token in query.split():
+                weight_ij = self.calc_weight(each_token, filename) 
+                summation_weight_ij += math.pow(weight_ij, 2)
+                summation_weight_iq += math.pow(2, 2)
+            
+            dominator = math.sqrt(summation_weight_ij) * math.sqrt(summation_weight_iq)
+            # print(dominator)
+        print(numerator/dominator)
+
+            
 
 if __name__ == "__main__":
 
     Test = Inverted_Index()
     Test.load_Inverted_Index("output/")
-    Test.calc_term_freq()
+    Test.get_top_ten_results("var","output/")
 
     
