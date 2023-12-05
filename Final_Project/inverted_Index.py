@@ -17,6 +17,7 @@ from MaxHeap import MaxHeap
 class Inverted_Index:
     def __init__(self):
         self.inverted_index = {}
+        self.query_index = {}
         self.max_freq = {}
         self.total_documents = 0
 
@@ -84,11 +85,6 @@ class Inverted_Index:
                         self.max_freq[each_doc] = current_word_dict[each_doc]
                 except:
                     self.max_freq[each_doc] = current_word_dict[each_doc]
-        
-        # print max_freq
-        # for eachkey in self.max_freq:
-        #     print(str(eachkey) + ": ")
-        #     print(self.max_freq[eachkey])
 
     def calc_term_freq(self, term, document):
         if term in self.inverted_index.keys():
@@ -107,18 +103,36 @@ class Inverted_Index:
         except:
             df = 0
 
-        if df != 0:
-            return math.log10(self.total_documents/df)
-        else:
-            return 0
+        return math.log10(self.total_documents/(df + 1))
     
     def calc_weight(self, token, document):
         return (self.calc_term_freq(token, document) * self.calc_Idf(token)) + 1
 
+    def calc_weight_query(self, token, document):
+        words_query = self.preprocess_page(document)
+
+        tf = words_query.count(token)
+        idf = math.log10(1/1)
+
+        return (tf * idf) + 1
+
+    def get_url(self, file_path):
+        try:
+            with open(file_path, 'r') as file:
+                # Get first line of the file
+                first_line = file.readline().strip()
+
+                match = re.search(r'(https?://\S+)', first_line)
+                
+                if match:
+                    return match.group(0)
+                else:
+                    raise ValueError("No URL!!")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
     def get_top_ten_results(self, query, directory):
-        # add query to inverted index
-        words = self.preprocess_page(query)
-        self.update_index(query, words)
+        self.load_Inverted_Index(directory)
         # Store filenames and Cosine similarity
         results_dict = {}
 
@@ -131,12 +145,12 @@ class Inverted_Index:
             
             for each_token in query.split():
                 weight_ij = self.calc_weight(each_token, filename) 
-                weight_iq = self.calc_weight(each_token, query)
+                weight_iq = self.calc_weight_query(each_token, query)
                 numerator += weight_ij * weight_iq
             # calc dominator
             for each_token in query.split():
                 weight_ij = self.calc_weight(each_token, filename) 
-                weight_iq = self.calc_weight(each_token, query)
+                weight_iq = self.calc_weight_query(each_token, query)
                 summation_weight_ij += math.pow(weight_ij, 2)
                 summation_weight_iq += math.pow(weight_iq, 2)
             # 
@@ -148,13 +162,18 @@ class Inverted_Index:
         sorted_items = sorted(results_dict.items(), key=lambda x: x[1], reverse=True)
         # Creates a new dictionary from the sorted list
         sorted_results_dict = dict(sorted_items)  
-        for x in sorted_results_dict:
-            print(x, sorted_results_dict[x])
+        # print top ten results
+        print("Top 10 results:")
+        for rank, name in enumerate(sorted_results_dict):
+            filepath = directory + name
+            # print(x, sorted_results_dict[x])
+            print(str(rank + 1) + ": ", str(self.get_url(filepath)))
+            if rank + 1 == 10:
+                return
 
 if __name__ == "__main__":
 
     Test = Inverted_Index()
-    Test.load_Inverted_Index("output/")
-    Test.get_top_ten_results("var play count","output/")
+    Test.get_top_ten_results("Muhlenberg art programs","output/")
 
     
