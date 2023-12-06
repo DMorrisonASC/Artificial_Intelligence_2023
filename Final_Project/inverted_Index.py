@@ -12,7 +12,8 @@ import requests
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from MaxHeap import MaxHeap
+from collections import Counter
+# from MaxHeap import MaxHeap
 
 class Inverted_Index:
     def __init__(self):
@@ -25,9 +26,9 @@ class Inverted_Index:
     def parse_HTML(self, html_content):
         # Parse the HTML content
         x = re.findall(">([^<]+)</[^>]+>", html_content)
-        #x = [a.strip() for a in x if a!='']
-        x = [a for a in x if a!='']
-        x = ''.join(x)
+        x = [a for a in x if a != '']
+        x = ' '.join(x)
+
         return x
     
     def preprocess_page(self, webpage):
@@ -40,7 +41,8 @@ class Inverted_Index:
         Returns:
         - list: A list of preprocessed words.
         """
-        parsed_text = self.parse_HTML(webpage)
+        # parsed_text = self.parse_HTML(webpage)
+        parsed_text = webpage
 
         stop_words = set(stopwords.words('english'))
         lemmatizer = WordNetLemmatizer()
@@ -70,10 +72,13 @@ class Inverted_Index:
         for filename in os.listdir(directory):
             self.total_documents += 1
             with open(os.path.join(directory, filename), 'r', errors='ignore') as file:
-                words = self.preprocess_page(file.read())
+                content = file.read()
+                # words = self.preprocess_page(content)
+                words = content.split()
                 self.update_index(filename, words)
 
         self.set_max_freq()
+        # self.printInvertedIndex()
 
     def set_max_freq(self):
         for each_key_word in self.inverted_index:
@@ -91,35 +96,43 @@ class Inverted_Index:
             frequent_num = self.inverted_index.get(term).get(document, 0)
         else:
             frequent_num = 0
-
-        if frequent_num != 0:
-            return frequent_num / self.max_freq.get(document) 
-        else:
-            return 0 
+        # print(frequent_num / self.max_freq.get(document))
+        return frequent_num / self.max_freq.get(document) 
 
     def calc_Idf(self, term):
-        try:
-            df = len(self.inverted_index.get(term))
-        except:
-            df = 0
+        cur_index = self.inverted_index.get(term, 0)
 
+        if cur_index != 0:
+            df = len(cur_index)
+        else:
+            df = 0
+            
+        # print(df)
+        # print(math.log10(self.total_documents/(df + 1)))
         return math.log10(self.total_documents/(df + 1))
+
+    def printInvertedIndex(self):
+        for x in self.inverted_index:
+            print(x, self.inverted_index.get(x))
     
     def calc_weight(self, token, document):
+        # print((self.calc_term_freq(token, document) * self.calc_Idf(token)) + 1)
         return (self.calc_term_freq(token, document) * self.calc_Idf(token)) + 1
 
     def calc_weight_query(self, token, document):
-        words_query = self.preprocess_page(document)
+        words_query = document.split()
+        max_query_freq = Counter(words_query).most_common(3).pop()[1]
 
-        tf = words_query.count(token)
-        idf = math.log10(1/1)
+        tf = words_query.count(token) / max_query_freq
+        idf = self.calc_Idf(token)
 
         return (tf * idf) + 1
+        # pass
 
     def get_url(self, file_path):
         try:
             with open(file_path, 'r') as file:
-                # Get first line of the file
+                # Get first line of the file which should have a url
                 first_line = file.readline().strip()
 
                 match = re.search(r'(https?://\S+)', first_line)
@@ -127,36 +140,39 @@ class Inverted_Index:
                 if match:
                     return match.group(0)
                 else:
-                    raise ValueError("No URL!!")
+                    raise ValueError("No URL!")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            # print(f"An error occurred: {e}")
+            pass
 
     def get_top_ten_results(self, query, directory):
         self.load_Inverted_Index(directory)
         # Store filenames and Cosine similarity
         results_dict = {}
+        #
 
         # calculate the summation of weights for all tokens and add them to `numerator`
-        for filename in os.listdir(directory):
+        for textName in os.listdir(directory):
             numerator = 0
             dominator = 0
             summation_weight_ij = 0
             summation_weight_iq = 0
             
             for each_token in query.split():
-                weight_ij = self.calc_weight(each_token, filename) 
+                weight_ij = self.calc_weight(each_token, textName) 
                 weight_iq = self.calc_weight_query(each_token, query)
                 numerator += weight_ij * weight_iq
+                # print(weight_ij)
             # calc dominator
             for each_token in query.split():
-                weight_ij = self.calc_weight(each_token, filename) 
+                weight_ij = self.calc_weight(each_token, textName) 
                 weight_iq = self.calc_weight_query(each_token, query)
                 summation_weight_ij += math.pow(weight_ij, 2)
                 summation_weight_iq += math.pow(weight_iq, 2)
             # 
             dominator = (math.sqrt(summation_weight_ij) * math.sqrt(summation_weight_iq)) + 1
             # print(numerator/dominator, filename) 
-            results_dict[filename] = (numerator/dominator) 
+            results_dict[textName] = (numerator/dominator)
 
         # Sort the dictionary by values in descending order
         sorted_items = sorted(results_dict.items(), key=lambda x: x[1], reverse=True)
@@ -166,14 +182,16 @@ class Inverted_Index:
         print("Top 10 results:")
         for rank, name in enumerate(sorted_results_dict):
             filepath = directory + name
-            # print(x, sorted_results_dict[x])
-            print(str(rank + 1) + ": ", str(self.get_url(filepath)))
+            print(sorted_results_dict[name], end=" ")
+            print(str(rank + 1) + ": " + name + ". Url: " + str(self.get_url(filepath)))
             if rank + 1 == 10:
                 return
 
 if __name__ == "__main__":
 
     Test = Inverted_Index()
-    Test.get_top_ten_results("Muhlenberg art programs","output/")
+    Test.load_Inverted_Index("crandocs/")
+    # Test.printInvertedIndex()
+    Test.get_top_ten_results("what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .","crandocs/")
 
     
