@@ -13,7 +13,6 @@ import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from collections import Counter
-# from MaxHeap import MaxHeap
 
 class Inverted_Index:
     def __init__(self):
@@ -30,6 +29,59 @@ class Inverted_Index:
         x = ' '.join(x)
 
         return x
+
+    # def preprocess_email(self, text, version):
+    #     """
+    #     Preprocesses an email text based on the specified version.
+
+    #     Parameters:
+    #     - text (str): The input email text.
+    #     - version (int): The version of preprocessing to apply.
+
+    #     Returns:
+    #     - list: A list of preprocessed words.
+    #     """
+    #     # Remove removing stopwords and lemmatization
+    #     if (version == 1):
+    #         stop_words = set(stopwords.words('english'))
+    #         lemmatizer = WordNetLemmatizer()
+    #         words = []
+    #         for each_word in text.split():
+    #             if each_word.isalpha():
+    #                 if each_word.lower() not in stop_words:
+    #                     lem_word = lemmatizer.lemmatize(each_word.lower())
+    #                     words.append(lem_word)
+    #         return words
+    #     # Only removing stopwords
+    #     elif (version == 2):
+    #         stop_words = set(stopwords.words('english'))
+    #         words = []
+    #         for each_word in text.split():
+    #             if each_word.isalpha():
+    #                 if each_word.lower() not in stop_words:
+    #                     words.append(each_word.lower())
+    #         return words
+    #     # Only lemmatization
+    #     elif (version == 3):
+    #         lemmatizer = WordNetLemmatizer()
+    #         words = []
+    #         for each_word in text.split():
+    #             if each_word.isalpha():
+    #                 lem_word = lemmatizer.lemmatize(each_word.lower())
+    #                 words.append(lem_word)
+    #         return words
+        
+    #     # No improvements
+    #     elif (version == 4):
+    #         words = []
+    #         for each_word in text.split():
+    #             if each_word.isalpha():
+    #                 words.append(each_word.lower())
+    #         return words
+        
+    #     # Error checking
+    #     else:
+    #         print("Check `preprocess_email()` method!")
     
     def preprocess_page(self, webpage):
         """
@@ -73,7 +125,7 @@ class Inverted_Index:
             self.total_documents += 1
             with open(os.path.join(directory, filename), 'r', errors='ignore') as file:
                 content = file.read()
-                # words = self.preprocess_page(content)
+                words = self.preprocess_page(content)
                 words = content.split()
                 self.update_index(filename, words)
 
@@ -106,10 +158,9 @@ class Inverted_Index:
             df = len(cur_index)
         else:
             df = 0
-            
-        # print(df)
+
         # print(math.log10(self.total_documents/(df + 1)))
-        return math.log10(self.total_documents/(df + 1))
+        return math.log10(self.total_documents/(df + 1)) + 1
 
     def printInvertedIndex(self):
         for x in self.inverted_index:
@@ -117,17 +168,16 @@ class Inverted_Index:
     
     def calc_weight(self, token, document):
         # print((self.calc_term_freq(token, document) * self.calc_Idf(token)) + 1)
-        return (self.calc_term_freq(token, document) * self.calc_Idf(token)) + 1
+        return (self.calc_term_freq(token, document) * self.calc_Idf(token))
 
     def calc_weight_query(self, token, document):
-        words_query = document.split()
+        words_query = document
         max_query_freq = Counter(words_query).most_common(3).pop()[1]
 
         tf = words_query.count(token) / max_query_freq
         idf = self.calc_Idf(token)
 
-        return (tf * idf) + 1
-        # pass
+        return (tf * idf)
 
     def get_url(self, file_path):
         try:
@@ -150,7 +200,7 @@ class Inverted_Index:
         # Store filenames and Cosine similarity
         results_dict = {}
         #
-
+        query_list = self.preprocess_page(query)
         # calculate the summation of weights for all tokens and add them to `numerator`
         for textName in os.listdir(directory):
             numerator = 0
@@ -158,15 +208,15 @@ class Inverted_Index:
             summation_weight_ij = 0
             summation_weight_iq = 0
             
-            for each_token in query.split():
+            for each_token in query_list:
                 weight_ij = self.calc_weight(each_token, textName) 
-                weight_iq = self.calc_weight_query(each_token, query)
+                weight_iq = self.calc_weight_query(each_token, query_list)
                 numerator += weight_ij * weight_iq
                 # print(weight_ij)
             # calc dominator
-            for each_token in query.split():
+            for each_token in query_list:
                 weight_ij = self.calc_weight(each_token, textName) 
-                weight_iq = self.calc_weight_query(each_token, query)
+                weight_iq = self.calc_weight_query(each_token, query_list)
                 summation_weight_ij += math.pow(weight_ij, 2)
                 summation_weight_iq += math.pow(weight_iq, 2)
             # 
@@ -189,9 +239,11 @@ class Inverted_Index:
 
 if __name__ == "__main__":
 
+    # Test = Inverted_Index()
+    # Test.load_Inverted_Index("crandocs/")
+    # Test.get_top_ten_results("what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .","crandocs/")
+
     Test = Inverted_Index()
     Test.load_Inverted_Index("crandocs/")
-    # Test.printInvertedIndex()
-    Test.get_top_ten_results("what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .","crandocs/")
-
-    
+    Test.get_top_ten_results("what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .","crandocs/")    
+    # Test.get_top_ten_results("what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft .","crandocs/")    
